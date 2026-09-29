@@ -10,17 +10,23 @@ framework:
                     max_retries: 3
                     multiplier: 2
             failed: 'doctrine://default?queue_name=failed'
-            # sync: 'sync://'
 
-        default_bus: messenger.bus.default
+        default_bus: command.bus
 
         buses:
-            messenger.bus.default: []
+            command.bus: []
+            query.bus: []
+            event.bus:
+                default_middleware:
+                    allow_no_handlers: true
 
         routing:
             Symfony\Component\Mailer\Messenger\SendEmailMessage: async
             Symfony\Component\Notifier\Message\ChatMessage: async
             Symfony\Component\Notifier\Message\SmsMessage: async
 
-            # Route your messages to the transports
-            # 'App\Message\YourMessage': async
+            # Domain events dispatched via App\Shared\Application\Bus\EventBus.
+            # ApplicationSubmitted triggers the async AI enrichment worker
+            # (see EnrichApplicationOnApplicationSubmitted); run it with
+            # `bin/console messenger:consume async`.
+            App\Recruitment\Domain\Event\ApplicationSubmitted: async

@@ -1,0 +1,121 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Candidaturas — ATS PoC{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <h1>Candidaturas</h1>
+
+        <div class="filters">
+            <input type="text" id="filter-search" placeholder="Buscar por nombre o email…">
+            <select id="filter-status">
+                <option value="">Todos los estados</option>
+                <option value="received">Recibida</option>
+                <option value="enriched">Enriquecida</option>
+            </select>
+            <select id="filter-job">
+                <option value="">Todos los puestos</option>
+                {% for job in jobPostings %}
+                    <option value="{{ job.id }}">{{ job.title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Candidato</th>
+                    <th>Email</th>
+                    <th>Estado</th>
+                    <th>Puntuación IA</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody id="applications-body">
+                <tr><td colspan="5" class="empty-state">Cargando…</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        (function () {
+            const tbody = document.getElementById('applications-body');
+            const search = document.getElementById('filter-search');
+            const status = document.getElementById('filter-status');
+            const job = document.getElementById('filter-job');
+            let debounceTimer = null;
+
+            function statusLabel(value) {
+                return value === 'enriched' ? 'Enriquecida' : 'Recibida';
+            }
+
+            function render(applications) {
+                tbody.textContent = '';
+
+                if (applications.length === 0) {
+                    const emptyRow = document.createElement('tr');
+                    const emptyCell = document.createElement('td');
+                    emptyCell.colSpan = 5;
+                    emptyCell.className = 'empty-state';
+                    emptyCell.textContent = 'No se han encontrado candidaturas.';
+                    emptyRow.appendChild(emptyCell);
+                    tbody.appendChild(emptyRow);
+                    return;
+                }
+
+                applications.forEach(function (item) {
+                    const row = document.createElement('tr');
+
+                    const nameCell = document.createElement('td');
+                    const nameLink = document.createElement('a');
+                    nameLink.className = 'row-link';
+                    nameLink.href = '/applications/' + encodeURIComponent(item.id);
+                    nameLink.textContent = item.fullName;
+                    nameCell.appendChild(nameLink);
+
+                    const emailCell = document.createElement('td');
+                    emailCell.textContent = item.email;
+
+                    const statusCell = document.createElement('td');
+                    const badge = document.createElement('span');
+                    badge.className = 'badge badge-' + item.status;
+                    badge.textContent = statusLabel(item.status);
+                    statusCell.appendChild(badge);
+
+                    const scoreCell = document.createElement('td');
+                    scoreCell.className = 'score';
+                    scoreCell.textContent = item.aiScore === null ? '—' : item.aiScore;
+
+                    const dateCell = document.createElement('td');
+                    dateCell.textContent = new Date(item.appliedAt).toLocaleString();
+
+                    row.append(nameCell, emailCell, statusCell, scoreCell, dateCell);
+                    tbody.appendChild(row);
+                });
+            }
+
+            function load() {
+                const params = new URLSearchParams();
+                if (search.value.trim() !== '') params.set('search', search.value.trim());
+                if (status.value !== '') params.set('status', status.value);
+                if (job.value !== '') params.set('jobId', job.value);
+
+                fetch('/api/applications?' + params.toString())
+                    .then(function (response) { return response.json(); })
+                    .then(render)
+                    .catch(function () {
+                        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Error al cargar las candidaturas.</td></tr>';
+                    });
+            }
+
+            search.addEventListener('input', function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(load, 250);
+            });
+            status.addEventListener('change', load);
+            job.addEventListener('change', load);
+
+            load();
+        })();
+    </script>
+{% endblock %}

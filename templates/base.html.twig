@@ -19,6 +19,24 @@
         {% endif %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        <nav class="navbar">
+            <div class="container">
+                <a href="{{ path('apply_page') }}" class="brand">ATS PoC</a>
+                <div>
+                    <a href="{{ path('apply_page') }}">Aplicar a una oferta</a>
+                    <a href="{{ path('applications_list_page') }}">Ver candidaturas</a>
+                    <a href="{{ path('jobs_list_page') }}">Gestionar ofertas</a>
+                </div>
+            </div>
+        </nav>
+        <div class="container">
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-error">{{ message }}</div>
+            {% endfor %}
+            {% block body %}{% endblock %}
+        </div>
     </body>
 </html>

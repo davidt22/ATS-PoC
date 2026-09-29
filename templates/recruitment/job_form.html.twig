@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ mode == 'edit' ? 'Editar oferta' : 'Nueva oferta' }} — ATS PoC{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <h1>{{ mode == 'edit' ? 'Editar oferta' : 'Nueva oferta' }}</h1>
+
+        {% if errors is defined and errors._domain is defined %}
+            <div class="alert alert-error">{{ errors._domain }}</div>
+        {% endif %}
+
+        <form method="post">
+            <input type="hidden" name="_token" value="{{ csrf_token('submit') }}">
+            <div class="form-group">
+                <label for="title">Título</label>
+                <input type="text" id="title" name="title" required
+                    value="{{ formData is defined ? formData.title : (jobPosting is defined ? jobPosting.title : '') }}">
+                {% if errors is defined and errors.title is defined %}
+                    <div class="error">{{ errors.title }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="description">Descripción</label>
+                <textarea id="description" name="description" required>{{ formData is defined ? formData.description : (jobPosting is defined ? jobPosting.description : '') }}</textarea>
+                {% if errors is defined and errors.description is defined %}
+                    <div class="error">{{ errors.description }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit">{{ mode == 'edit' ? 'Guardar cambios' : 'Crear oferta' }}</button>
+        </form>
+    </div>
+{% endblock %}

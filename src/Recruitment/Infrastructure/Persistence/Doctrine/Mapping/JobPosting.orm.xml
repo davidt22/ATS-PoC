@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                       https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Recruitment\Domain\Model\JobPosting" table="job_postings">
+        <id name="id" type="recruitment_uuid" column="id" length="36">
+            <generator strategy="NONE"/>
+        </id>
+
+        <field name="title" type="recruitment_job_title" column="title" length="150"/>
+        <field name="description" type="recruitment_job_description" column="description"/>
+    </entity>
+</doctrine-mapping>

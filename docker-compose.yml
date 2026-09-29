@@ -49,8 +49,16 @@ services:
     networks:
       - viterbit_net
 
+###> doctrine/doctrine-bundle ###
+# Using the hand-written `database` service (MySQL) above instead — this
+# marker is kept empty on purpose so Symfony Flex does not re-inject its
+# PostgreSQL block on every `composer` run.
+###< doctrine/doctrine-bundle ###
+
 networks:
   viterbit_net:
 
 volumes:
   viterbit_db_data:
+###> doctrine/doctrine-bundle ###
+###< doctrine/doctrine-bundle ###

@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ofertas — ATS PoC{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <h1>Ofertas de trabajo</h1>
+        <p><a class="btn" href="{{ path('jobs_create_page') }}">+ Nueva oferta</a></p>
+
+        {% if jobPostings|length == 0 %}
+            <p class="empty-state">Todavía no hay ofertas. Crea la primera para poder recibir candidaturas.</p>
+        {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Descripción</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobPostings %}
+                        <tr>
+                            <td><a class="row-link" href="{{ path('job_detail_page', {id: job.id}) }}">{{ job.title }}</a></td>
+                            <td>{{ job.description|length > 80 ? job.description|slice(0, 80) ~ '…' : job.description }}</td>
+                            <td>
+                                <a href="{{ path('jobs_edit_page', {id: job.id}) }}">Editar</a>
+                                &nbsp;·&nbsp;
+                                <form method="post" action="{{ path('jobs_delete_page', {id: job.id}) }}" style="display:inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" onclick="return confirm('¿Eliminar esta oferta?')" style="background:none;color:var(--color-danger);padding:0;font-weight:600;">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+{% endblock %}

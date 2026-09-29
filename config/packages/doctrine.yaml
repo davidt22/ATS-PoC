@@ -8,6 +8,15 @@ doctrine:
 
         profiling_collect_backtrace: '%kernel.debug%'
         use_savepoints: true
+        types:
+            recruitment_uuid: App\Recruitment\Infrastructure\Persistence\Doctrine\Type\UuidType
+            recruitment_full_name: App\Recruitment\Infrastructure\Persistence\Doctrine\Type\FullNameType
+            recruitment_email: App\Recruitment\Infrastructure\Persistence\Doctrine\Type\EmailType
+            recruitment_phone: App\Recruitment\Infrastructure\Persistence\Doctrine\Type\PhoneType
+            recruitment_cv_text: App\Recruitment\Infrastructure\Persistence\Doctrine\Type\CvTextType
+            recruitment_ai_score: App\Recruitment\Infrastructure\Persistence\Doctrine\Type\AiScoreType
+            recruitment_job_title: App\Recruitment\Infrastructure\Persistence\Doctrine\Type\JobTitleType
+            recruitment_job_description: App\Recruitment\Infrastructure\Persistence\Doctrine\Type\JobDescriptionType
     orm:
         auto_generate_proxy_classes: true
         enable_lazy_ghost_objects: true
@@ -16,14 +25,14 @@ doctrine:
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
         identity_generation_preferences:
             Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
-        auto_mapping: true
+        auto_mapping: false
         mappings:
-            App:
-                type: attribute
+            Recruitment:
                 is_bundle: false
-                dir: '%kernel.project_dir%/src/Entity'
-                prefix: 'App\Entity'
-                alias: App
+                type: xml
+                dir: '%kernel.project_dir%/src/Recruitment/Infrastructure/Persistence/Doctrine/Mapping'
+                prefix: 'App\Recruitment\Domain\Model'
+                alias: Recruitment
         controller_resolver:
             auto_mapping: false
 

@@ -1,3 +1,251 @@
+:root {
+    --color-bg: #f7f7fb;
+    --color-surface: #ffffff;
+    --color-border: #e2e2ea;
+    --color-text: #1f2430;
+    --color-muted: #6b7280;
+    --color-primary: #3652f0;
+    --color-primary-dark: #2a3fc0;
+    --color-success: #14804a;
+    --color-danger: #b3261e;
+    --radius: 8px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
-    background-color: skyblue;
+    margin: 0;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+}
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+.navbar {
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.navbar .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.navbar a {
+    color: var(--color-text);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 1.25rem;
+}
+
+.navbar a:hover {
+    color: var(--color-primary);
+}
+
+.navbar .brand {
+    font-size: 1.1rem;
+    margin-left: 0;
+}
+
+.card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+h1 {
+    font-size: 1.5rem;
+    margin-top: 0;
+}
+
+h2 {
+    font-size: 1.15rem;
+}
+
+.form-group {
+    margin-bottom: 1.1rem;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    font-size: 0.9rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-family: inherit;
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 180px;
+}
+
+.hint {
+    color: var(--color-muted);
+    font-size: 0.82rem;
+    margin-top: 0.25rem;
+}
+
+.error {
+    color: var(--color-danger);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+.alert {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+}
+
+.alert-success {
+    background: #e6f6ee;
+    color: var(--color-success);
+    border: 1px solid #b6e5cc;
+}
+
+.alert-error {
+    background: #fbeceb;
+    color: var(--color-danger);
+    border: 1px solid #f0c1bd;
+}
+
+button, .btn {
+    display: inline-block;
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+button:hover, .btn:hover {
+    background: var(--color-primary-dark);
+}
+
+.filters {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+}
+
+.filters > * {
+    flex: 1;
+    min-width: 160px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    text-align: left;
+    padding: 0.6rem 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.9rem;
+}
+
+th {
+    color: var(--color-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+}
+
+tr:hover td {
+    background: var(--color-bg);
+}
+
+a.row-link {
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-received {
+    background: #eef1fd;
+    color: var(--color-primary);
+}
+
+.badge-enriched {
+    background: #e6f6ee;
+    color: var(--color-success);
+}
+
+.score {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+dl.detail-grid {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.5rem 1.5rem;
+    margin: 0;
+}
+
+dl.detail-grid dt {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+}
+
+dl.detail-grid dd {
+    margin: 0;
+}
+
+pre.cv-text {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.empty-state {
+    color: var(--color-muted);
+    text-align: center;
+    padding: 2rem 0;
 }

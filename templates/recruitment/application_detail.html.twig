@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ application.fullName }} — ATS PoC{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <h1>{{ application.fullName }}</h1>
+        <span class="badge badge-{{ application.status }}">{{ application.status == 'enriched' ? 'Enriquecida' : 'Recibida' }}</span>
+
+        <h2 style="margin-top:1.5rem;">Datos del candidato</h2>
+        <dl class="detail-grid">
+            <dt>Email</dt>
+            <dd>{{ application.email }}</dd>
+
+            <dt>Teléfono</dt>
+            <dd>{{ application.phone ?: '—' }}</dd>
+
+            <dt>Notas</dt>
+            <dd>{{ application.notes ?: '—' }}</dd>
+
+            <dt>Aplicó el</dt>
+            <dd>{{ application.appliedAt|date('d/m/Y H:i') }}</dd>
+
+            <dt>Última actualización</dt>
+            <dd>{{ application.updatedAt|date('d/m/Y H:i') }}</dd>
+        </dl>
+
+        <h2 style="margin-top:1.5rem;">Enriquecimiento IA</h2>
+        {% if application.aiScore is not null %}
+            <dl class="detail-grid">
+                <dt>Puntuación</dt>
+                <dd class="score">{{ application.aiScore }} / 100</dd>
+
+                <dt>Resumen</dt>
+                <dd>{{ application.aiSummary }}</dd>
+            </dl>
+        {% else %}
+            <p class="empty-state">El enriquecimiento con IA todavía se está procesando. Recarga la página en unos segundos.</p>
+        {% endif %}
+
+        <h2 style="margin-top:1.5rem;">CV</h2>
+        <pre class="cv-text">{{ application.cvText }}</pre>
+    </div>
+{% endblock %}

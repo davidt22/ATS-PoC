@@ -1,0 +1,78 @@
+# Design — Bounded Context: Recruitment (ATS PoC)
+
+Estado: **aprobado e implementado** (ver `tasks.md` para el detalle de ejecución).
+
+## Decisiones de arquitectura (con el porqué)
+
+| Decisión | Elegido | Alternativa descartada | Por qué |
+|---|---|---|---|
+| Bounded context | Un único BC `Recruitment` con dos agregados (`JobPosting`, `JobApplication`) | Dos BCs separados (`JobCatalog` + `Applications`) | Para el alcance del PoC ambos agregados comparten el mismo lenguaje ubicuo y ciclo de vida (una oferta solo existe para recibir candidaturas); separarlos añadiría un evento de integración cross-context sin beneficio real aquí. Documentado como trade-off consciente. |
+| CQRS | Command/Query bus vía Symfony Messenger (3 buses: `command.bus`, `query.bus`, `event.bus`) | Servicios de aplicación simples | Ya decidido y en marcha; el ejercicio pide explícitamente CQRS/eventos y hay varios casos de uso (5 comandos, 6 queries). |
+| Persistencia | Mapping Doctrine XML en Infrastructure + tipos DBAL custom por Value Object | Atributos `#[ORM\...]` en el dominio | Dominio 100% libre de Doctrine; ya implementado (`UuidType`, `FullNameType`, `EmailType`, `PhoneType`, `CvTextType`, `AiScoreType`, enum nativo para `ApplicationStatus`). |
+| Enriquecimiento IA | Puerto `AiEnrichmentPort` en `Domain/Service`, adaptador mock determinista en Infrastructure | Llamada real a un LLM | Restricción explícita del enunciado: mock, sin API real. |
+| Async | Evento de dominio `ApplicationSubmitted` enrutado a transporte `async` (Doctrine transport, tabla `messenger_messages`) | RabbitMQ/Redis | Cero infraestructura extra para levantar el PoC; sigue siendo asíncrono de verdad (requiere `messenger:consume async`), documentado en README. |
+| Borrado de oferta con candidaturas | Bloqueado con excepción de dominio | Cascade delete / permitir huérfanos | Decisión registrada en requirements (R0.6): invariante de integridad referencial a nivel de dominio, no solo FK de BD. |
+
+## Modelo de dominio
+
+### Agregado `JobPosting`
+- Identidad: `Uuid id`.
+- Atributos: `title` (VO `JobTitle`, no vacío, máx. 150), `description` (VO `JobDescription`, no vacío, máx. 5000).
+- Invariante nueva (R0.7): título y descripción no vacíos → ya cubierta si se modelan como VOs en lugar de `string` plano (cambio respecto al código de referencia existente, que los tenía como `string` — se corrige en la fase de implementación).
+- Métodos: `create()`, `update(title, description)`.
+- No emite eventos de dominio (no hay ningún caso de uso asíncrono que dependa de su ciclo de vida).
+
+### Agregado `JobApplication` (sin cambios respecto al código de referencia)
+- Igual que lo ya implementado: VOs `FullName`, `Email`, `Phone`, `CvText`, `ApplicationStatus`, `AiScore`; eventos `ApplicationSubmitted` y `ApplicationEnriched`; método `enrich()`.
+
+## Casos de uso (Application layer)
+
+### Comandos (`command.bus`)
+1. `CreateJobPostingCommand` → crea `JobPosting`.
+2. `UpdateJobPostingCommand` → edita título/descripción.
+3. `DeleteJobPostingCommand` → elimina si no tiene candidaturas asociadas (si las tiene, lanza `JobPostingHasApplicationsException`).
+4. `SubmitApplicationCommand` → ya implementado.
+5. `EnrichApplicationCommand` → ya implementado, disparado por el event handler asíncrono.
+
+### Queries (`query.bus`)
+1. `ListJobPostingsQuery` → ya implementado.
+2. `GetJobPostingDetailQuery` → nuevo, detalle de una oferta.
+3. `ListApplicationsQuery` → ya implementado (filtros status/jobId/search).
+4. `GetApplicationDetailQuery` → ya implementado.
+
+### Event handlers (`event.bus`, async)
+- `EnrichApplicationOnApplicationSubmitted` → ya implementado (llama a `AiEnrichmentPort`, despacha `EnrichApplicationCommand`).
+
+## Puertos e Infraestructura
+
+- `JobPostingRepositoryInterface`: se añade `save()` y `delete()` (ya tenía `findAll()`/`findById()`), necesarios para el CRUD.
+- Para R0.6, el repositorio expone `hasApplicationsFor(Uuid $jobId): bool` (o el `DeleteJobPostingCommandHandler` inyecta también `JobApplicationRepositoryInterface` y usa un `existsForJob()` — se decide en tasks.md cuál queda más limpio sin duplicar responsabilidad).
+- `DoctrineJobPostingRepository`: añade `save()`/`delete()`, mapping XML sin cambios de forma (se añaden las columnas si los VOs cambian de `string` a `JobTitle`/`JobDescription`, requiere sus propios `DoctrineType`).
+
+## UI — rutas
+
+### Web (Twig, ya implementadas, sin cambios)
+- `GET /apply`, `POST /apply`
+- `GET /applications`
+- `GET /applications/{id}`
+
+### Web — nuevas para gestión de ofertas
+- `GET /jobs` — listado de ofertas (con acciones editar/eliminar).
+- `GET /jobs/new`, `POST /jobs/new` — crear.
+- `GET /jobs/{id}/edit`, `POST /jobs/{id}/edit` — editar.
+- `POST /jobs/{id}/delete` — eliminar (con confirmación simple; si falla por R0.6, mensaje flash de error).
+
+### REST (JSON, consumidas por el frontend JS del listado de candidaturas)
+- `POST /api/applications`, `GET /api/applications`, `GET /api/applications/{id}` — ya implementadas.
+- `GET /api/jobs` — ya implementada.
+- Sin nuevos endpoints REST para el CRUD de ofertas (se gestiona vía formularios Twig server-rendered, más simple/KISS que duplicar en JSON sin un consumidor real).
+
+## Reglas de dependencia (recordatorio, sin cambios)
+
+`Domain` no depende de Symfony/Doctrine (salvo tipos DBAL en Infrastructure) ni de `Infrastructure`/`UI`. `Application` solo depende de `Domain` y de `Shared\Application\Bus`. `Infrastructure` implementa los puertos de `Domain`. `UI` solo llama a `Application` (comandos/queries), nunca a `Domain\Model` ni `Infrastructure` directamente.
+
+## Riesgos / trade-offs conscientes
+
+- Convertir `JobPosting.title`/`description` de `string` a VOs (`JobTitle`/`JobDescription`) obliga a tocar el mapping XML y añadir 2 tipos DBAL más — coste pequeño, gana consistencia con R0.7 y con el resto del agregado `JobApplication` (todas las invariantes de texto ya son VOs).
+- No hay paginación en `ListJobPostingsQuery` ni `ListApplicationsQuery` — aceptado en requirements como fuera de alcance para el volumen de un PoC.
+- `DeleteJobPostingCommandHandler` comprueba `existsByJobId()` y luego borra sin bloqueo pesimista: si `SubmitApplicationCommand` para esa misma oferta está en vuelo justo entre ambos pasos, en teoría podría colarse una candidatura huérfana. Aceptado conscientemente para el PoC — mitigarlo con un lock pesimista o una constraint `FOREIGN KEY` a nivel de BD sería la solución de producción, pero añade complejidad desproporcionada para el volumen/concurrencia de este ejercicio.

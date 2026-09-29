@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ jobPosting.title }} — ATS PoC{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <h1>{{ jobPosting.title }}</h1>
+        <p style="white-space: pre-line;">{{ jobPosting.description }}</p>
+        <p>
+            <a class="btn" href="{{ path('jobs_edit_page', {id: jobPosting.id}) }}">Editar</a>
+            <a class="btn" href="{{ path('apply_page') }}">Aplicar a esta oferta</a>
+        </p>
+    </div>
+{% endblock %}

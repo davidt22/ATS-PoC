@@ -18,6 +18,53 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
+        exclude:
+            - '../src/**/Domain/Model/'
+            - '../src/**/Domain/ValueObject/'
+            - '../src/**/Domain/Event/'
+            - '../src/**/Domain/Exception/'
+            - '../src/**/Domain/Service/AiEnrichmentResult.php'
+            - '../src/**/Application/DTO/'
+            - '../src/**/Application/Command/'
+            - '../src/**/Application/Query/'
+            - '../src/**/UI/Http/Rest/Request/'
+            - '../src/**/UI/Http/Rest/Response/'
+            - '../src/Shared/Domain/'
+            - '../src/Kernel.php'
+
+    # Binds each bounded context's domain repository interface to its Doctrine implementation.
+    App\Recruitment\Domain\Repository\JobApplicationRepositoryInterface:
+        alias: App\Recruitment\Infrastructure\Persistence\Doctrine\Repository\DoctrineJobApplicationRepository
+
+    App\Recruitment\Domain\Repository\JobPostingRepositoryInterface:
+        alias: App\Recruitment\Infrastructure\Persistence\Doctrine\Repository\DoctrineJobPostingRepository
+
+    App\Recruitment\Domain\Service\AiEnrichmentPort:
+        alias: App\Recruitment\Infrastructure\Ai\MockAiEnrichmentAdapter
+
+    App\Shared\Domain\Clock:
+        alias: App\Shared\Infrastructure\Symfony\SystemClock
+
+    App\Shared\Application\Bus\CommandBus:
+        alias: App\Shared\Infrastructure\Symfony\Bus\MessengerCommandBus
+
+    App\Shared\Application\Bus\QueryBus:
+        alias: App\Shared\Infrastructure\Symfony\Bus\MessengerQueryBus
+
+    App\Shared\Application\Bus\EventBus:
+        alias: App\Shared\Infrastructure\Symfony\Bus\MessengerEventBus
+
+    App\Shared\Infrastructure\Symfony\Bus\MessengerCommandBus:
+        arguments:
+            $commandBus: '@command.bus'
+
+    App\Shared\Infrastructure\Symfony\Bus\MessengerQueryBus:
+        arguments:
+            $queryBus: '@query.bus'
+
+    App\Shared\Infrastructure\Symfony\Bus\MessengerEventBus:
+        arguments:
+            $eventBus: '@event.bus'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

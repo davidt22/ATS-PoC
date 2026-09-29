@@ -1,0 +1,69 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Aplicar a una oferta — ATS PoC{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <h1>Aplicar a una oferta</h1>
+
+        {% if errors is defined and errors._domain is defined %}
+            <div class="alert alert-error">{{ errors._domain }}</div>
+        {% endif %}
+
+        <form method="post" action="{{ path('apply_page') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('submit') }}">
+            <div class="form-group">
+                <label for="jobId">Puesto</label>
+                <select id="jobId" name="jobId" required>
+                    <option value="">Selecciona un puesto…</option>
+                    {% for job in jobPostings %}
+                        <option value="{{ job.id }}" {{ formData is defined and formData.jobId == job.id ? 'selected' : '' }}>{{ job.title }}</option>
+                    {% endfor %}
+                </select>
+                {% if errors is defined and errors.jobId is defined %}
+                    <div class="error">{{ errors.jobId }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="fullName">Nombre completo</label>
+                <input type="text" id="fullName" name="fullName" value="{{ formData is defined ? formData.fullName : '' }}" required>
+                {% if errors is defined and errors.fullName is defined %}
+                    <div class="error">{{ errors.fullName }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{ formData is defined ? formData.email : '' }}" required>
+                {% if errors is defined and errors.email is defined %}
+                    <div class="error">{{ errors.email }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Teléfono (opcional)</label>
+                <input type="tel" id="phone" name="phone" value="{{ formData is defined ? formData.phone : '' }}">
+                {% if errors is defined and errors.phone is defined %}
+                    <div class="error">{{ errors.phone }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Notas (opcional)</label>
+                <input type="text" id="notes" name="notes" value="{{ formData is defined ? formData.notes : '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="cvText">CV (texto plano)</label>
+                <textarea id="cvText" name="cvText" required>{{ formData is defined ? formData.cvText : '' }}</textarea>
+                <div class="hint">Pega el contenido de tu CV como texto (sin subida de archivos). Mínimo 50 caracteres.</div>
+                {% if errors is defined and errors.cvText is defined %}
+                    <div class="error">{{ errors.cvText }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit">Enviar candidatura</button>
+        </form>
+    </div>
+{% endblock %}
