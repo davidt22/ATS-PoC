@@ -53,6 +53,12 @@ Micro-ATS (Applicant Tracking System) que permite a un candidato aplicar a una o
 - R4.2 SI el enriquecimiento aún no se ha completado, EL SISTEMA DEBE mostrar el detalle igualmente, con resumen/puntuación vacíos y estado `received`.
 - R4.3 SI la JobApplication solicitada no existe, EL SISTEMA DEBE devolver 404.
 
+### R5 — Descripción del puesto en el formulario de aplicación
+
+- R5.1 CUANDO el candidato selecciona un puesto en el desplegable de `/apply`, EL SISTEMA DEBE mostrar la descripción de ese puesto justo debajo del desplegable.
+- R5.2 CUANDO el candidato cambia la selección a otro puesto, EL SISTEMA DEBE actualizar la descripción mostrada con la del nuevo puesto seleccionado, sin recargar la página.
+- R5.3 SI no hay ningún puesto seleccionado, EL SISTEMA NO DEBE mostrar ninguna descripción.
+
 ## Requisitos no funcionales
 
 - RNF1 Estructura en capas DDD + Hexagonal + CQRS/eventos, con reglas de dependencia documentadas (Domain no depende de Infra/UI; Application solo de Domain; Infra implementa puertos de Domain; UI solo llama a Application).

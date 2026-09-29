@@ -12,9 +12,13 @@
 
         <form method="post" action="{{ path('apply_page') }}">
             <input type="hidden" name="_token" value="{{ csrf_token('submit') }}">
-            <div class="form-group">
+            {% set jobDescriptions = {} %}
+            {% for job in jobPostings %}
+                {% set jobDescriptions = jobDescriptions|merge({(job.id): job.description}) %}
+            {% endfor %}
+            <div class="form-group" {{ stimulus_controller('job-description', { descriptions: jobDescriptions }) }}>
                 <label for="jobId">Puesto</label>
-                <select id="jobId" name="jobId" required>
+                <select id="jobId" name="jobId" required {{ stimulus_target('job-description', 'select') }} {{ stimulus_action('job-description', 'update', 'change') }}>
                     <option value="">Selecciona un puesto…</option>
                     {% for job in jobPostings %}
                         <option value="{{ job.id }}" {{ formData is defined and formData.jobId == job.id ? 'selected' : '' }}>{{ job.title }}</option>
@@ -23,6 +27,7 @@
                 {% if errors is defined and errors.jobId is defined %}
                     <div class="error">{{ errors.jobId }}</div>
                 {% endif %}
+                <div class="hint job-description-output" {{ stimulus_target('job-description', 'output') }}></div>
             </div>
 
             <div class="form-group">

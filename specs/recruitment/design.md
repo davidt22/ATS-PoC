@@ -12,6 +12,7 @@ Estado: **aprobado e implementado** (ver `tasks.md` para el detalle de ejecució
 | Enriquecimiento IA | Puerto `AiEnrichmentPort` en `Domain/Service`, adaptador mock determinista en Infrastructure | Llamada real a un LLM | Restricción explícita del enunciado: mock, sin API real. |
 | Async | Evento de dominio `ApplicationSubmitted` enrutado a transporte `async` (Doctrine transport, tabla `messenger_messages`) | RabbitMQ/Redis | Cero infraestructura extra para levantar el PoC; sigue siendo asíncrono de verdad (requiere `messenger:consume async`), documentado en README. |
 | Borrado de oferta con candidaturas | Bloqueado con excepción de dominio | Cascade delete / permitir huérfanos | Decisión registrada en requirements (R0.6): invariante de integridad referencial a nivel de dominio, no solo FK de BD. |
+| Descripción de puesto en `/apply` (R5) | Embeber en el propio HTML el mapa `id → description` (ya cargado por `ApplyPageController` vía `ListJobPostingsQuery`) como `data-*-value` JSON, leído por un Stimulus controller | Endpoint `fetch` a `/api/jobs` en cada cambio de selección | Los datos ya están en memoria en la misma request que renderiza `/apply`; añadir una llamada de red para algo que el servidor ya tiene sería sobre-ingeniería (KISS). Sin Live Components instalados, Stimulus es el mecanismo de interactividad ya disponible en el stack. |
 
 ## Modelo de dominio
 
@@ -66,6 +67,12 @@ Estado: **aprobado e implementado** (ver `tasks.md` para el detalle de ejecució
 - `POST /api/applications`, `GET /api/applications`, `GET /api/applications/{id}` — ya implementadas.
 - `GET /api/jobs` — ya implementada.
 - Sin nuevos endpoints REST para el CRUD de ofertas (se gestiona vía formularios Twig server-rendered, más simple/KISS que duplicar en JSON sin un consumidor real).
+
+## UI — descripción dinámica de puesto en `/apply` (R5)
+
+- `templates/recruitment/apply.html.twig`: el contenedor del select `#jobId` lleva `data-controller="job-description"` y `data-job-description-descriptions-value="{{ ... }}"` con el JSON `{ [jobId]: description }` de `jobPostings` (ya disponibles en el controlador, sin query adicional). El `<select>` añade `data-job-description-target="select"` y `data-action="change->job-description#update"`; justo debajo se añade `<div data-job-description-target="output">`.
+- `assets/controllers/job_description_controller.js` (nuevo, autodescubierto por convención de nombre de Symfony Stimulus Bundle, sin tocar `controllers.json` que solo lista paquetes de terceros): en `connect()` y en `update()` (evento `change` del select) lee `descriptionsValue[select.value]` y actualiza el `textContent` del target `output`, vaciándolo si no hay selección (R5.3).
+- No se usa Live Components (no instalado) ni AJAX: es la opción más simple dado que el servidor ya sirvió los datos.
 
 ## Reglas de dependencia (recordatorio, sin cambios)
 

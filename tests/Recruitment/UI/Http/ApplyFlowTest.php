@@ -64,4 +64,23 @@ final class ApplyFlowTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('.error');
     }
+
+    public function test_the_apply_page_exposes_job_descriptions_for_dynamic_display(): void
+    {
+        $client = static::createClient();
+        $this->cleanRecruitmentTables();
+
+        $jobPostings = self::getContainer()->get(JobPostingRepositoryInterface::class);
+        $jobId = Uuid::generate();
+        $jobPostings->save(JobPosting::create($jobId, new JobTitle('Backend Engineer'), new JobDescription('Great job')));
+
+        $crawler = $client->request('GET', '/apply');
+
+        self::assertResponseIsSuccessful();
+        $descriptionsAttribute = $crawler->filter('[data-controller="job-description"]')
+            ->attr('data-job-description-descriptions-value');
+        self::assertNotNull($descriptionsAttribute);
+        $descriptions = json_decode($descriptionsAttribute, true, flags: JSON_THROW_ON_ERROR);
+        self::assertSame('Great job', $descriptions[$jobId->value()]);
+    }
 }

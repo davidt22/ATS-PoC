@@ -115,8 +115,16 @@ Leyenda: `[ref]` = ya existe como código de referencia de la sesión anterior (
 
 **Incidencia detectada y corregida en este bloque:** `composer require`/`recipes:install` de Symfony Flex regenera un `compose.override.yaml` con un servicio `mailer` (Mailpit) y un override de `database` a Postgres, que Docker Compose fusiona automáticamente con `docker-compose.yml` si el fichero existe. Se eliminó (no aportaba nada a este stack) y se dejó documentado aquí para que, si una futura instalación de paquetes lo regenera, se sepa que es descartable sin más.
 
+## 13. UI — descripción dinámica de puesto en `/apply` (R5)
+
+- [x] 13.1 `[new]` `assets/controllers/job_description_controller.js`: Stimulus controller (`targets = ['select', 'output']`, `values = { descriptions: Object }`) que muestra/actualiza la descripción del puesto seleccionado en `connect()` y en `change` (R5.1, R5.2, R5.3).
+- [x] 13.2 `[ref→edit]` `templates/recruitment/apply.html.twig`: añadir `data-controller`, `data-*-value` con el JSON `id → description`, targets `select`/`output` y el `<div>` de salida debajo del select.
+- [x] 13.3 `[new]` Test funcional en `tests/Recruitment/UI/Http/ApplyFlowTest.php`: `GET /apply` con una oferta creada expone en el HTML el JSON de descripciones con el valor esperado.
+
+**Verificación:** `vendor/bin/phpunit` → 62 tests, 133 assertions, 0 fallos. Verificado manualmente en navegador (Docker levantado): al seleccionar una oferta en `/apply` aparece su descripción debajo del select, se oculta sin selección (R5.3) y se actualiza correctamente al cambiar de oferta (R5.2), sin recargar la página.
+
 ## Orden de ejecución propuesto
 
-1 → 2 (revisión) → 5.1-5.6 → 5.7-5.8 (migración) → 3 → 4 (revisión) → 6 (revisión) → 7 → 8 → 9 (revisión) → 10 → 11.
+1 → 2 (revisión) → 5.1-5.6 → 5.7-5.8 (migración) → 3 → 4 (revisión) → 6 (revisión) → 7 → 8 → 9 (revisión) → 10 → 11 → 13.
 
 Se ejecutará bloque a bloque, verificando cada uno (autoload, `cache:clear`, tests del bloque) antes de pasar al siguiente — no se implementará todo de un tirón.
