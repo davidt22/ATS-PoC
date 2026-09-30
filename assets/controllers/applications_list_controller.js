@@ -23,7 +23,7 @@ export default class extends Controller {
             .then((response) => response.json())
             .then((applications) => this.render(applications))
             .catch(() => {
-                this.bodyTarget.innerHTML = '<tr><td colspan="5" class="empty-state">Error al cargar las candidaturas.</td></tr>';
+                this.bodyTarget.innerHTML = '<tr><td colspan="7" class="empty-state">Error al cargar las candidaturas.</td></tr>';
             });
     }
 
@@ -33,7 +33,7 @@ export default class extends Controller {
         if (applications.length === 0) {
             const emptyRow = document.createElement('tr');
             const emptyCell = document.createElement('td');
-            emptyCell.colSpan = 6;
+            emptyCell.colSpan = 7;
             emptyCell.className = 'empty-state';
             emptyCell.textContent = 'No se han encontrado candidaturas.';
             emptyRow.appendChild(emptyCell);
@@ -50,6 +50,9 @@ export default class extends Controller {
             nameLink.href = '/applications/' + encodeURIComponent(item.id);
             nameLink.textContent = item.fullName;
             nameCell.appendChild(nameLink);
+
+            const jobTitleCell = document.createElement('td');
+            jobTitleCell.textContent = item.jobTitle;
 
             const emailCell = document.createElement('td');
             emailCell.textContent = item.email;
@@ -74,7 +77,7 @@ export default class extends Controller {
             viewButton.textContent = 'Ver';
             actionsCell.appendChild(viewButton);
 
-            row.append(nameCell, emailCell, statusCell, scoreCell, dateCell, actionsCell);
+            row.append(nameCell, jobTitleCell, emailCell, statusCell, scoreCell, dateCell, actionsCell);
             this.bodyTarget.appendChild(row);
         });
     }

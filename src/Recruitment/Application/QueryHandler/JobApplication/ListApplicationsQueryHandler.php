@@ -7,6 +7,7 @@ namespace App\Recruitment\Application\QueryHandler\JobApplication;
 use App\Recruitment\Application\DTO\ApplicationListItemDTO;
 use App\Recruitment\Domain\Repository\ApplicationSearchCriteria;
 use App\Recruitment\Domain\Repository\JobApplicationRepositoryInterface;
+use App\Recruitment\Domain\Repository\JobPostingRepositoryInterface;
 use App\Recruitment\Domain\ValueObject\ApplicationStatus;
 use App\Recruitment\Application\Query\JobApplication\ListApplicationsQuery;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -16,6 +17,7 @@ final class ListApplicationsQueryHandler
 {
     public function __construct(
         private readonly JobApplicationRepositoryInterface $applications,
+        private readonly JobPostingRepositoryInterface $jobPostings,
     ) {
     }
 
@@ -34,8 +36,16 @@ final class ListApplicationsQueryHandler
             null !== $query->search && '' !== $query->search ? $query->search : null,
         );
 
+        $jobTitles = [];
+        foreach ($this->jobPostings->findAll() as $jobPosting) {
+            $jobTitles[$jobPosting->id()->value()] = $jobPosting->title()->value();
+        }
+
         return array_map(
-            static fn ($application) => ApplicationListItemDTO::fromDomain($application),
+            static fn ($application) => ApplicationListItemDTO::fromDomain(
+                $application,
+                $jobTitles[$application->jobId()->value()] ?? '',
+            ),
             $this->applications->search($criteria),
         );
     }

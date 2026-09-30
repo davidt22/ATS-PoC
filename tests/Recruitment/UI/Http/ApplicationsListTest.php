@@ -61,6 +61,7 @@ final class ApplicationsListTest extends WebTestCase
         $filtered = json_decode($client->getResponse()->getContent(), true);
         self::assertCount(1, $filtered);
         self::assertSame('ana@example.com', $filtered[0]['email']);
+        self::assertSame('Backend Engineer', $filtered[0]['jobTitle']);
     }
 
     public function test_detail_returns_404_for_an_unknown_application(): void
