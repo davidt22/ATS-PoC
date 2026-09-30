@@ -33,7 +33,7 @@ export default class extends Controller {
         if (applications.length === 0) {
             const emptyRow = document.createElement('tr');
             const emptyCell = document.createElement('td');
-            emptyCell.colSpan = 5;
+            emptyCell.colSpan = 6;
             emptyCell.className = 'empty-state';
             emptyCell.textContent = 'No se han encontrado candidaturas.';
             emptyRow.appendChild(emptyCell);
@@ -67,7 +67,14 @@ export default class extends Controller {
             const dateCell = document.createElement('td');
             dateCell.textContent = new Date(item.appliedAt).toLocaleString();
 
-            row.append(nameCell, emailCell, statusCell, scoreCell, dateCell);
+            const actionsCell = document.createElement('td');
+            const viewButton = document.createElement('a');
+            viewButton.className = 'btn';
+            viewButton.href = '/applications/' + encodeURIComponent(item.id);
+            viewButton.textContent = 'Ver';
+            actionsCell.appendChild(viewButton);
+
+            row.append(nameCell, emailCell, statusCell, scoreCell, dateCell, actionsCell);
             this.bodyTarget.appendChild(row);
         });
     }
