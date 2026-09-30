@@ -123,8 +123,19 @@ Leyenda: `[ref]` = ya existe como código de referencia de la sesión anterior (
 
 **Verificación:** `vendor/bin/phpunit` → 62 tests, 133 assertions, 0 fallos. Verificado manualmente en navegador (Docker levantado): al seleccionar una oferta en `/apply` aparece su descripción debajo del select, se oculta sin selección (R5.3) y se actualiza correctamente al cambiar de oferta (R5.2), sin recargar la página.
 
+## 14. Infraestructura — RabbitMQ como transporte de Messenger (RNF6)
+
+- [x] 14.1 `[ref→edit]` `Dockerfile`: añadir extensión PHP `amqp` (`rabbitmq-c-dev` + `pecl install amqp`).
+- [x] 14.2 `[ref→edit]` `docker-compose.yml`: nuevo servicio `rabbitmq` (imagen `rabbitmq:3.13-management-alpine`, puertos `5672`/`15672`) y nuevo servicio `messenger-worker` (`messenger:consume async -vv`, `restart: unless-stopped`); `php` añade `depends_on: rabbitmq`.
+- [x] 14.3 `[new]` `composer require symfony/amqp-messenger` (dentro del contenedor, con la extensión ya presente).
+- [x] 14.4 `[ref→edit]` `.env`: `MESSENGER_TRANSPORT_DSN` apunta a `amqp://guest:guest@rabbitmq:5672/%2f/messages`.
+- [x] 14.5 `[ref→edit]` `.env.test`: fijar `MESSENGER_TRANSPORT_DSN=doctrine://default` para no depender de RabbitMQ en tests.
+- [x] 14.6 `[ref→edit]` `Makefile`/`README.md`: `make worker` pasa a mostrar logs del worker automático; documentar UI de gestión en `:15672`.
+
+**Verificación:** `docker compose build php messenger-worker` OK (extensión `amqp` instalada) → `docker compose up -d` levanta `rabbitmq` y `messenger-worker` sin errores → `composer require symfony/amqp-messenger` instalado → `docker compose logs messenger-worker` confirma `[OK] Consuming messages from transport "async"` conectado al broker → prueba manual real (`POST /api/applications` contra una oferta creada) terminó en `status: enriched` con `aiScore`/`aiSummary` rellenos en ~2s tras pasar por RabbitMQ → `vendor/bin/phpunit` → 62 tests, 133 assertions, 0 fallos (usa `doctrine://default` vía `.env.test`, sin depender de RabbitMQ). Datos de prueba (oferta y candidatura) eliminados tras verificar.
+
 ## Orden de ejecución propuesto
 
-1 → 2 (revisión) → 5.1-5.6 → 5.7-5.8 (migración) → 3 → 4 (revisión) → 6 (revisión) → 7 → 8 → 9 (revisión) → 10 → 11 → 13.
+1 → 2 (revisión) → 5.1-5.6 → 5.7-5.8 (migración) → 3 → 4 (revisión) → 6 (revisión) → 7 → 8 → 9 (revisión) → 10 → 11 → 13 → 14.
 
 Se ejecutará bloque a bloque, verificando cada uno (autoload, `cache:clear`, tests del bloque) antes de pasar al siguiente — no se implementará todo de un tirón.

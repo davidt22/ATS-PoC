@@ -27,4 +27,4 @@ test:
 	docker compose exec php vendor/bin/phpunit
 
 worker:
-	docker compose exec php php bin/console messenger:consume async -vv
+	docker compose logs -f messenger-worker

@@ -66,6 +66,7 @@ Micro-ATS (Applicant Tracking System) que permite a un candidato aplicar a una o
 - RNF3 Código legible, sin sobre-ingeniería (KISS), cumpliendo SOLID y PSR-4/PSR-12.
 - RNF4 Instrucciones simples para ejecutar en local (Docker), idealmente `make init`.
 - RNF5 Documentación concisa (README) sin detalles de implementación internos.
+- RNF6 El procesamiento asíncrono (enriquecimiento IA y futuros eventos de dominio) DEBE ejecutarse sobre un broker de colas real (RabbitMQ), consumido por un worker en background que no requiera arranque manual.
 
 ## Fuera de alcance (explícito)
 
@@ -80,6 +81,7 @@ Micro-ATS (Applicant Tracking System) que permite a un candidato aplicar a una o
 
 - JobPosting tiene gestión completa (crear/listar/detalle/editar/eliminar), no solo datos semilla.
 - Eliminar una oferta con candidaturas asociadas está bloqueado (excepción de dominio), para no dejar `jobId` huérfanos.
+- Se revierte la decisión inicial de usar Doctrine transport para el procesamiento asíncrono (ver `design.md`): ahora se usa RabbitMQ con un worker dedicado en background (RNF6), a petición explícita del usuario.
 
 ## Preguntas abiertas para el usuario
 

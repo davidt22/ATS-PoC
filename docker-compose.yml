@@ -8,6 +8,22 @@ services:
       - .:/var/www/html
     depends_on:
       - database
+      - rabbitmq
+    networks:
+      - viterbit_net
+
+  messenger-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: viterbit_messenger_worker
+    command: php bin/console messenger:consume async -vv
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - database
+      - rabbitmq
     networks:
       - viterbit_net
 
@@ -46,6 +62,15 @@ services:
       - "8081:8080"
     depends_on:
       - database
+    networks:
+      - viterbit_net
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: viterbit_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - viterbit_net
 

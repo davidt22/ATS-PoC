@@ -12,7 +12,7 @@ Requisitos: Docker + Docker Compose.
 make init
 ```
 
-Esto construye las imágenes, levanta PHP-FPM + Nginx + MySQL + Adminer, instala dependencias, crea la base de datos y ejecuta las migraciones (también las de la base de datos de test). La aplicación queda disponible en **http://localhost:8080**.
+Esto construye las imágenes, levanta PHP-FPM + Nginx + MySQL + Adminer + RabbitMQ + el worker de Messenger, instala dependencias, crea la base de datos y ejecuta las migraciones (también las de la base de datos de test). La aplicación queda disponible en **http://localhost:8080**.
 
 Otros comandos:
 
@@ -22,24 +22,20 @@ make down     # parar y eliminar contenedores
 make shell    # shell dentro del contenedor PHP
 make migrate  # ejecutar migraciones pendientes
 make test     # ejecutar la suite de tests
-make worker   # consumir el transporte asíncrono (enriquecimiento IA)
+make worker   # ver logs del worker de Messenger (enriquecimiento IA)
 ```
 
 Adminer (inspección de la BD) queda disponible en **http://localhost:8081** (sistema: MySQL, servidor: `database`, usuario: `app`, contraseña: `!ChangeMe!`, BD: `viterbit`).
 
 ### Procesar el enriquecimiento con IA
 
-Al enviar una candidatura, el enriquecimiento se encola de forma asíncrona (no bloquea la respuesta). Para que se procese, el worker de Messenger debe estar corriendo:
+Al enviar una candidatura, el enriquecimiento se encola en RabbitMQ de forma asíncrona (no bloquea la respuesta). El worker (`messenger-worker`) se levanta automáticamente con `make init`/`make up` y consume la cola en background — no requiere ningún paso manual. Para ver su actividad:
 
 ```bash
 make worker
 ```
 
-o, en una terminal separada, dejarlo corriendo en bucle:
-
-```bash
-docker compose exec php php bin/console messenger:consume async -vv
-```
+La UI de gestión de RabbitMQ está disponible en **http://localhost:15672** (usuario/contraseña: `guest`/`guest`).
 
 ## Cómo ejecutar los tests
 
@@ -56,7 +52,7 @@ Resumen — el detalle y el porqué de cada una está en [`specs/recruitment/des
 - **DDD + Hexagonal + CQRS**: un único bounded context `Recruitment` (agregados `JobPosting` y `JobApplication`) estructurado en capas `Domain / Application / Infrastructure / UI`, más `Shared/` para código transversal (bus de comandos/queries/eventos, reloj). Comandos y queries se despachan vía Symfony Messenger en tres buses (`command.bus`, `query.bus`, `event.bus`).
 - **Dominio libre de framework**: las entidades y Value Objects no dependen de Symfony ni de Doctrine. La persistencia usa mapping XML (no atributos `#[ORM\...]`) y tipos DBAL propios que convierten entre columnas y Value Objects.
 - **Invariantes como Value Objects**: `FullName`, `Email`, `Phone`, `CvText`, `AiScore`, `JobTitle`, `JobDescription` validan sus propias reglas en el constructor — el formulario web valida por UX, pero el dominio se protege a sí mismo independientemente del punto de entrada.
-- **Eventos de dominio reales**: el agregado `JobApplication` registra `ApplicationSubmitted` al crearse; ese evento se enruta a un transporte asíncrono (Doctrine transport, tabla `messenger_messages`) y un manejador separado (`EnrichApplicationOnApplicationSubmitted`) llama al puerto de IA y despacha `EnrichApplicationCommand` para actualizar la candidatura una vez completado.
+- **Eventos de dominio reales**: el agregado `JobApplication` registra `ApplicationSubmitted` al crearse; ese evento se enruta a un transporte asíncrono real sobre **RabbitMQ**, consumido por un worker dedicado (`messenger-worker`) que corre en background, y un manejador separado (`EnrichApplicationOnApplicationSubmitted`) llama al puerto de IA y despacha `EnrichApplicationCommand` para actualizar la candidatura una vez completado.
 - **Enriquecimiento IA mockeado**: `AiEnrichmentPort` es un puerto de dominio; `MockAiEnrichmentAdapter` lo implementa de forma determinista (resumen = excerpt del CV, puntuación = solapamiento de palabras clave entre el CV y el puesto), sin llamar a ningún proveedor externo, tal y como pide el enunciado.
 - **Bloqueo de borrado de ofertas con candidaturas**: eliminar una oferta que ya tiene candidaturas asociadas lanza una excepción de dominio (`JobPostingHasApplicationsException`) en vez de permitir referencias huérfanas.
 - **Reglas de dependencia**: `Domain` no depende de `Infrastructure`/`UI`; `Application` solo depende de `Domain` y de `Shared\Application\Bus`; `Infrastructure` implementa los puertos de `Domain`; `UI` solo llama a `Application`.

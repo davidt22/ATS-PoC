@@ -5,8 +5,12 @@ RUN apk add --no-cache \
         libzip-dev \
         git \
         unzip \
+        rabbitmq-c-dev \
+        $PHPIZE_DEPS \
     && docker-php-ext-configure intl \
-    && docker-php-ext-install intl pdo pdo_mysql zip opcache
+    && docker-php-ext-install intl pdo pdo_mysql zip opcache \
+    && pecl install amqp \
+    && docker-php-ext-enable amqp
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
