@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\Recruitment\Application\CommandHandler;
 
 use App\Recruitment\Domain\Event\ApplicationSubmitted;
+use App\Recruitment\Domain\Exception\DuplicateJobApplicationException;
 use App\Recruitment\Domain\Exception\JobPostingNotFoundException;
 use App\Recruitment\Domain\Model\JobPosting;
+use App\Recruitment\Domain\Repository\ApplicationSearchCriteria;
 use App\Recruitment\Domain\ValueObject\ApplicationStatus;
 use App\Recruitment\Domain\ValueObject\JobDescription;
 use App\Recruitment\Domain\ValueObject\JobTitle;
@@ -100,5 +102,71 @@ final class SubmitApplicationCommandHandlerTest extends TestCase
             null,
             str_repeat('a', 60),
         ));
+    }
+
+    public function test_it_throws_when_an_application_with_the_same_email_already_exists_for_the_job(): void
+    {
+        $repository = new InMemoryJobApplicationRepository();
+        $jobPostings = new InMemoryJobPostingRepository();
+        $jobId = Uuid::generate();
+        $jobPostings->save(JobPosting::create($jobId, new JobTitle('Backend Engineer'), new JobDescription('Great job')));
+
+        $handler = new SubmitApplicationCommandHandler($repository, $jobPostings, new RecordingEventBus(), new FixedClock(new \DateTimeImmutable()));
+
+        $handler(new SubmitApplicationCommand(
+            Uuid::generate()->value(),
+            $jobId->value(),
+            'Ana García',
+            'ana@example.com',
+            null,
+            null,
+            str_repeat('a', 60),
+        ));
+
+        $this->expectException(DuplicateJobApplicationException::class);
+
+        $handler(new SubmitApplicationCommand(
+            Uuid::generate()->value(),
+            $jobId->value(),
+            'Ana Otra',
+            'ANA@example.com',
+            null,
+            null,
+            str_repeat('a', 60),
+        ));
+    }
+
+    public function test_it_allows_the_same_email_to_apply_to_a_different_job_posting(): void
+    {
+        $repository = new InMemoryJobApplicationRepository();
+        $jobPostings = new InMemoryJobPostingRepository();
+        $jobIdA = Uuid::generate();
+        $jobIdB = Uuid::generate();
+        $jobPostings->save(JobPosting::create($jobIdA, new JobTitle('Backend Engineer'), new JobDescription('Great job')));
+        $jobPostings->save(JobPosting::create($jobIdB, new JobTitle('Frontend Engineer'), new JobDescription('Another great job')));
+
+        $handler = new SubmitApplicationCommandHandler($repository, $jobPostings, new RecordingEventBus(), new FixedClock(new \DateTimeImmutable()));
+
+        $handler(new SubmitApplicationCommand(
+            Uuid::generate()->value(),
+            $jobIdA->value(),
+            'Ana García',
+            'ana@example.com',
+            null,
+            null,
+            str_repeat('a', 60),
+        ));
+
+        $handler(new SubmitApplicationCommand(
+            Uuid::generate()->value(),
+            $jobIdB->value(),
+            'Ana García',
+            'ana@example.com',
+            null,
+            null,
+            str_repeat('a', 60),
+        ));
+
+        self::assertCount(2, $repository->search(new ApplicationSearchCriteria()));
     }
 }

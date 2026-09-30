@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Recruitment\Application\CommandHandler\JobApplication;
 
+use App\Recruitment\Domain\Exception\DuplicateJobApplicationException;
 use App\Recruitment\Domain\Exception\JobPostingNotFoundException;
 use App\Recruitment\Domain\Model\JobApplication;
 use App\Recruitment\Domain\Repository\JobApplicationRepositoryInterface;
@@ -37,11 +38,17 @@ final class SubmitApplicationCommandHandler
             throw JobPostingNotFoundException::withId($command->jobId);
         }
 
+        $email = new Email($command->email);
+
+        if ($this->applications->existsByEmailAndJobId($email, $jobId)) {
+            throw DuplicateJobApplicationException::forEmailAndJobId($email->value(), $command->jobId);
+        }
+
         $application = JobApplication::create(
             new Uuid($command->applicationId),
             $jobId,
             new FullName($command->fullName),
-            new Email($command->email),
+            $email,
             null !== $command->phone && '' !== trim($command->phone) ? new Phone($command->phone) : null,
             null !== $command->notes && '' !== trim($command->notes) ? trim($command->notes) : null,
             new CvText($command->cvText),

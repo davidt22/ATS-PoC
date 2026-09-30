@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Recruitment\Infrastructure\Persistence\Doctrine\Repository;
 
+use App\Recruitment\Domain\Exception\DuplicateJobApplicationException;
 use App\Recruitment\Domain\Model\JobApplication;
 use App\Recruitment\Domain\Repository\ApplicationSearchCriteria;
 use App\Recruitment\Domain\Repository\JobApplicationRepositoryInterface;
@@ -60,6 +61,30 @@ final class DoctrineJobApplicationRepositoryTest extends KernelTestCase
         $this->repository->save($this->buildApplication(Uuid::generate(), $jobId, 'Ana García', 'ana@example.com'));
 
         self::assertTrue($this->repository->existsByJobId($jobId));
+    }
+
+    public function test_exists_by_email_and_job_id_reflects_saved_applications(): void
+    {
+        $jobId = Uuid::generate();
+        $email = new Email('ana@example.com');
+        self::assertFalse($this->repository->existsByEmailAndJobId($email, $jobId));
+
+        $this->repository->save($this->buildApplication(Uuid::generate(), $jobId, 'Ana García', 'ana@example.com'));
+
+        self::assertTrue($this->repository->existsByEmailAndJobId($email, $jobId));
+        self::assertFalse($this->repository->existsByEmailAndJobId(new Email('otra@example.com'), $jobId));
+        self::assertFalse($this->repository->existsByEmailAndJobId($email, Uuid::generate()));
+    }
+
+    public function test_the_database_rejects_a_duplicate_email_and_job_id_pair(): void
+    {
+        $jobId = Uuid::generate();
+        $this->repository->save($this->buildApplication(Uuid::generate(), $jobId, 'Ana García', 'ana@example.com'));
+        $this->entityManager->clear();
+
+        $this->expectException(DuplicateJobApplicationException::class);
+
+        $this->repository->save($this->buildApplication(Uuid::generate(), $jobId, 'Ana Duplicada', 'ana@example.com'));
     }
 
     public function test_search_filters_by_status(): void

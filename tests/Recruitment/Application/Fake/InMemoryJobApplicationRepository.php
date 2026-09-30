@@ -7,6 +7,7 @@ namespace App\Tests\Recruitment\Application\Fake;
 use App\Recruitment\Domain\Model\JobApplication;
 use App\Recruitment\Domain\Repository\ApplicationSearchCriteria;
 use App\Recruitment\Domain\Repository\JobApplicationRepositoryInterface;
+use App\Recruitment\Domain\ValueObject\Email;
 use App\Shared\Domain\ValueObject\Uuid;
 
 final class InMemoryJobApplicationRepository implements JobApplicationRepositoryInterface
@@ -28,6 +29,17 @@ final class InMemoryJobApplicationRepository implements JobApplicationRepository
     {
         foreach ($this->applications as $application) {
             if ($application->jobId()->equals($jobId)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function existsByEmailAndJobId(Email $email, Uuid $jobId): bool
+    {
+        foreach ($this->applications as $application) {
+            if ($application->jobId()->equals($jobId) && $application->email()->value() === $email->value()) {
                 return true;
             }
         }

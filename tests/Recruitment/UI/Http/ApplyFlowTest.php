@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace App\Tests\Recruitment\UI\Http;
 
+use App\Recruitment\Domain\Model\JobApplication;
 use App\Recruitment\Domain\Model\JobPosting;
+use App\Recruitment\Domain\Repository\JobApplicationRepositoryInterface;
 use App\Recruitment\Domain\Repository\JobPostingRepositoryInterface;
+use App\Recruitment\Domain\ValueObject\CvText;
+use App\Recruitment\Domain\ValueObject\Email;
+use App\Recruitment\Domain\ValueObject\FullName;
 use App\Recruitment\Domain\ValueObject\JobDescription;
 use App\Recruitment\Domain\ValueObject\JobTitle;
 use App\Shared\Domain\ValueObject\Uuid;
@@ -63,6 +68,42 @@ final class ApplyFlowTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('.error');
+    }
+
+    public function test_submitting_a_duplicate_application_for_the_same_job_shows_an_error(): void
+    {
+        $client = static::createClient();
+        $this->cleanRecruitmentTables();
+
+        $jobPostings = self::getContainer()->get(JobPostingRepositoryInterface::class);
+        $jobId = Uuid::generate();
+        $jobPostings->save(JobPosting::create($jobId, new JobTitle('Backend Engineer'), new JobDescription('Great job')));
+
+        $applications = self::getContainer()->get(JobApplicationRepositoryInterface::class);
+        $applications->save(JobApplication::create(
+            Uuid::generate(),
+            $jobId,
+            new FullName('Ana García'),
+            new Email('ana@example.com'),
+            null,
+            null,
+            new CvText(str_repeat('a', 60)),
+            new \DateTimeImmutable(),
+        ));
+
+        $crawler = $client->request('GET', '/apply');
+        $form = $crawler->selectButton('Enviar candidatura')->form([
+            'jobId' => $jobId->value(),
+            'fullName' => 'Ana García',
+            'email' => 'ana@example.com',
+            'phone' => '',
+            'notes' => '',
+            'cvText' => str_repeat('Experiencia relevante en PHP. ', 5),
+        ]);
+        $client->submit($form);
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('.alert-error');
     }
 
     public function test_the_apply_page_exposes_job_descriptions_for_dynamic_display(): void

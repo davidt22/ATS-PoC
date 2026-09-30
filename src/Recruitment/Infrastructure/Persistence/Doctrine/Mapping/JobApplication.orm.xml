@@ -21,6 +21,10 @@
         <field name="aiScore" type="recruitment_ai_score" column="ai_score" nullable="true"/>
         <field name="updatedAt" type="datetime_immutable" column="updated_at"/>
 
+        <unique-constraints>
+            <unique-constraint name="uniq_job_applications_email_job_id" columns="email,job_id"/>
+        </unique-constraints>
+
         <indexes>
             <index name="idx_job_applications_status" columns="status"/>
             <index name="idx_job_applications_job_id" columns="job_id"/>
