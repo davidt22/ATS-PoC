@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Recruitment\Application\CommandHandler;
 
-use App\Recruitment\Application\Command\DeleteJobPostingCommand;
-use App\Recruitment\Application\CommandHandler\DeleteJobPostingCommandHandler;
 use App\Recruitment\Domain\Exception\JobPostingHasApplicationsException;
 use App\Recruitment\Domain\Exception\JobPostingNotFoundException;
 use App\Recruitment\Domain\Model\JobApplication;
@@ -16,6 +14,8 @@ use App\Recruitment\Domain\ValueObject\FullName;
 use App\Recruitment\Domain\ValueObject\JobDescription;
 use App\Recruitment\Domain\ValueObject\JobTitle;
 use App\Shared\Domain\ValueObject\Uuid;
+use App\Recruitment\Application\Command\JobPosting\DeleteJobPostingCommand;
+use App\Recruitment\Application\CommandHandler\JobPosting\DeleteJobPostingCommandHandler;
 use App\Tests\Recruitment\Application\Fake\InMemoryJobApplicationRepository;
 use App\Tests\Recruitment\Application\Fake\InMemoryJobPostingRepository;
 use PHPUnit\Framework\TestCase;

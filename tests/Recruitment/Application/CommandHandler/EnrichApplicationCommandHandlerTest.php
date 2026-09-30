@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Recruitment\Application\CommandHandler;
 
-use App\Recruitment\Application\Command\EnrichApplicationCommand;
-use App\Recruitment\Application\CommandHandler\EnrichApplicationCommandHandler;
 use App\Recruitment\Domain\Event\ApplicationEnriched;
 use App\Recruitment\Domain\Exception\ApplicationNotFoundException;
 use App\Recruitment\Domain\Model\JobApplication;
@@ -14,6 +12,8 @@ use App\Recruitment\Domain\ValueObject\CvText;
 use App\Recruitment\Domain\ValueObject\Email;
 use App\Recruitment\Domain\ValueObject\FullName;
 use App\Shared\Domain\ValueObject\Uuid;
+use App\Recruitment\Application\Command\JobApplication\EnrichApplicationCommand;
+use App\Recruitment\Application\CommandHandler\JobApplication\EnrichApplicationCommandHandler;
 use App\Tests\Recruitment\Application\Fake\FixedClock;
 use App\Tests\Recruitment\Application\Fake\InMemoryJobApplicationRepository;
 use App\Tests\Recruitment\Application\Fake\RecordingEventBus;

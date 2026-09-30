@@ -14,15 +14,33 @@ make init
 
 Esto construye las imágenes, levanta PHP-FPM + Nginx + MySQL + Adminer + RabbitMQ + el worker de Messenger, instala dependencias, crea la base de datos y ejecuta las migraciones (también las de la base de datos de test). La aplicación queda disponible en **http://localhost:8080**.
 
-Otros comandos:
+Todos los comandos disponibles están en el `Makefile` y se listan con:
 
 ```bash
-make up       # levantar contenedores ya construidos
-make down     # parar y eliminar contenedores
-make shell    # shell dentro del contenedor PHP
-make migrate  # ejecutar migraciones pendientes
-make test     # ejecutar la suite de tests
-make worker   # ver logs del worker de Messenger (enriquecimiento IA)
+make help
+```
+
+Los más habituales:
+
+```bash
+make up              # levantar contenedores ya construidos
+make down             # parar y eliminar contenedores
+make stop / restart   # parar o reiniciar contenedores sin eliminarlos
+make build            # reconstruir las imágenes sin caché
+make ps               # ver el estado de los contenedores
+make logs             # logs de todos los servicios (logs-php, logs-nginx, logs-db, logs-rabbitmq también disponibles)
+make shell            # shell dentro del contenedor PHP
+make db-shell         # cliente MySQL dentro del contenedor de base de datos
+make composer ARGS="require foo/bar"  # ejecutar composer dentro del contenedor
+make console ARGS="cache:clear"       # ejecutar bin/console dentro del contenedor
+make cache-clear      # limpiar la cache de Symfony
+make migrate          # ejecutar migraciones pendientes
+make migration-diff   # generar una migración a partir de los cambios de mapping
+make migration-status # ver el estado de las migraciones
+make test             # ejecutar la suite de tests
+make test-filter ARGS=EnrichApplication  # ejecutar tests filtrados por nombre
+make worker            # ver logs del worker de Messenger (enriquecimiento IA)
+make clean             # parar y eliminar contenedores, redes y el volumen de datos de MySQL
 ```
 
 Adminer (inspección de la BD) queda disponible en **http://localhost:8081** (sistema: MySQL, servidor: `database`, usuario: `app`, contraseña: `!ChangeMe!`, BD: `viterbit`).

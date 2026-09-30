@@ -32,9 +32,9 @@ final class JobPostingCrudTest extends WebTestCase
             'description' => 'Great job',
         ]);
         $client->submit($createForm);
-        self::assertResponseRedirects('/jobs');
+        self::assertResponseRedirects('/');
 
-        $client->request('GET', '/jobs');
+        $client->request('GET', '/');
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('body', 'Backend Engineer');
 
@@ -47,7 +47,7 @@ final class JobPostingCrudTest extends WebTestCase
             'description' => 'Even greater job',
         ]);
         $client->submit($editForm);
-        self::assertResponseRedirects('/jobs');
+        self::assertResponseRedirects('/');
 
         self::getContainer()->get(EntityManagerInterface::class)->clear();
         $updated = $jobPostings->findById($jobPosting->id());
@@ -75,10 +75,10 @@ final class JobPostingCrudTest extends WebTestCase
             new \DateTimeImmutable(),
         ));
 
-        $crawler = $client->request('GET', '/jobs');
+        $crawler = $client->request('GET', '/');
         $client->submit($crawler->selectButton('Eliminar')->form());
 
-        self::assertResponseRedirects('/jobs');
+        self::assertResponseRedirects('/');
         self::assertNotNull($jobPostings->findById($jobId));
     }
 
@@ -91,10 +91,10 @@ final class JobPostingCrudTest extends WebTestCase
         $jobId = Uuid::generate();
         $jobPostings->save(JobPosting::create($jobId, new JobTitle('Backend Engineer'), new JobDescription('Great job')));
 
-        $crawler = $client->request('GET', '/jobs');
+        $crawler = $client->request('GET', '/');
         $client->submit($crawler->selectButton('Eliminar')->form());
 
-        self::assertResponseRedirects('/jobs');
+        self::assertResponseRedirects('/');
         self::getContainer()->get(EntityManagerInterface::class)->clear();
         self::assertNull($jobPostings->findById($jobId));
     }

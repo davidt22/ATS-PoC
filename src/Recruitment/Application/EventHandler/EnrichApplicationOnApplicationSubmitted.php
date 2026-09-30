@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Recruitment\Application\EventHandler;
 
-use App\Recruitment\Application\Command\EnrichApplicationCommand;
 use App\Recruitment\Domain\Event\ApplicationSubmitted;
 use App\Recruitment\Domain\Exception\JobPostingNotFoundException;
 use App\Recruitment\Domain\Repository\JobPostingRepositoryInterface;
 use App\Recruitment\Domain\Service\AiEnrichmentPort;
 use App\Shared\Application\Bus\CommandBus;
 use App\Shared\Domain\ValueObject\Uuid;
+use App\Recruitment\Application\Command\JobApplication\EnrichApplicationCommand;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
