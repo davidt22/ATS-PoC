@@ -53,7 +53,7 @@ final class MockAiEnrichmentAdapter implements AiEnrichmentPort
     }
 
     /**
-     * @return list<string>
+     * @return array<string>
      */
     private function significantWords(string $text): array
     {

@@ -17,7 +17,7 @@ final class JobPostingListPageController extends AbstractController
     ) {
     }
 
-    #[Route('/jobs', name: 'jobs_list_page', methods: ['GET'])]
+    #[Route('/', name: 'jobs_list_page', methods: ['GET'])]
     public function __invoke(): Response
     {
         return $this->render('recruitment/jobs_list.html.twig', [
