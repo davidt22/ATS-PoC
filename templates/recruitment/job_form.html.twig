@@ -10,7 +10,7 @@
             <div class="alert alert-error">{{ errors._domain }}</div>
         {% endif %}
 
-        <form method="post">
+        <form method="post" data-turbo="false">
             <input type="hidden" name="_token" value="{{ csrf_token('submit') }}">
             <div class="form-group">
                 <label for="title">Título</label>

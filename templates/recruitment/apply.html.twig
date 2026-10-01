@@ -10,7 +10,7 @@
             <div class="alert alert-error">{{ errors._domain }}</div>
         {% endif %}
 
-        <form method="post" action="{{ path('apply_page') }}">
+        <form method="post" action="{{ path('apply_page') }}" data-turbo="false">
             <input type="hidden" name="_token" value="{{ csrf_token('submit') }}">
             {% set jobDescriptions = {} %}
             {% for job in jobPostings %}
