@@ -13,7 +13,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final class ListJobPostingsQueryHandler
 {
     public function __construct(
-        private readonly JobPostingRepositoryInterface $jobPostings,
+        private readonly JobPostingRepositoryInterface $jobPostingRepository,
     ) {
     }
 
@@ -24,7 +24,7 @@ final class ListJobPostingsQueryHandler
     {
         return array_map(
             static fn ($jobPosting) => JobPostingDTO::fromDomain($jobPosting),
-            $this->jobPostings->findAll(),
+            $this->jobPostingRepository->findAll(),
         );
     }
 }

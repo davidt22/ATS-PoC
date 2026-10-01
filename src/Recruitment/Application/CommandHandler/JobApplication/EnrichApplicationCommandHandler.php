@@ -17,7 +17,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final class EnrichApplicationCommandHandler
 {
     public function __construct(
-        private readonly JobApplicationRepositoryInterface $applications,
+        private readonly JobApplicationRepositoryInterface $applicationRepository,
         private readonly EventBus $eventBus,
         private readonly Clock $clock,
     ) {
@@ -26,7 +26,7 @@ final class EnrichApplicationCommandHandler
     public function __invoke(EnrichApplicationCommand $command): void
     {
         $id = new Uuid($command->applicationId);
-        $application = $this->applications->findById($id);
+        $application = $this->applicationRepository->findById($id);
 
         if (null === $application) {
             throw ApplicationNotFoundException::withId($command->applicationId);
@@ -34,7 +34,7 @@ final class EnrichApplicationCommandHandler
 
         $application->enrich($command->summary, new AiScore($command->score), $this->clock->now());
 
-        $this->applications->save($application);
+        $this->applicationRepository->save($application);
 
         $this->eventBus->publish(...$application->pullDomainEvents());
     }

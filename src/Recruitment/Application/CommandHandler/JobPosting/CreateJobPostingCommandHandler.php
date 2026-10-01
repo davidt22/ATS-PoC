@@ -16,7 +16,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final class CreateJobPostingCommandHandler
 {
     public function __construct(
-        private readonly JobPostingRepositoryInterface $jobPostings,
+        private readonly JobPostingRepositoryInterface $jobPostingRepository,
     ) {
     }
 
@@ -28,6 +28,6 @@ final class CreateJobPostingCommandHandler
             new JobDescription($command->description),
         );
 
-        $this->jobPostings->save($jobPosting);
+        $this->jobPostingRepository->save($jobPosting);
     }
 }

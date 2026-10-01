@@ -15,13 +15,13 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final class GetJobPostingDetailQueryHandler
 {
     public function __construct(
-        private readonly JobPostingRepositoryInterface $jobPostings,
+        private readonly JobPostingRepositoryInterface $jobPostingRepository,
     ) {
     }
 
     public function __invoke(GetJobPostingDetailQuery $query): JobPostingDTO
     {
-        $jobPosting = $this->jobPostings->findById(new Uuid($query->jobPostingId));
+        $jobPosting = $this->jobPostingRepository->findById(new Uuid($query->jobPostingId));
 
         if (null === $jobPosting) {
             throw JobPostingNotFoundException::withId($query->jobPostingId);

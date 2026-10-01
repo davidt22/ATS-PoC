@@ -16,24 +16,24 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final class DeleteJobPostingCommandHandler
 {
     public function __construct(
-        private readonly JobPostingRepositoryInterface $jobPostings,
-        private readonly JobApplicationRepositoryInterface $applications,
+        private readonly JobPostingRepositoryInterface $jobPostingRepository,
+        private readonly JobApplicationRepositoryInterface $applicationRepository,
     ) {
     }
 
     public function __invoke(DeleteJobPostingCommand $command): void
     {
         $id = new Uuid($command->jobPostingId);
-        $jobPosting = $this->jobPostings->findById($id);
+        $jobPosting = $this->jobPostingRepository->findById($id);
 
         if (null === $jobPosting) {
             throw JobPostingNotFoundException::withId($command->jobPostingId);
         }
 
-        if ($this->applications->existsByJobId($id)) {
+        if ($this->applicationRepository->existsByJobId($id)) {
             throw JobPostingHasApplicationsException::forId($command->jobPostingId);
         }
 
-        $this->jobPostings->delete($jobPosting);
+        $this->jobPostingRepository->delete($jobPosting);
     }
 }

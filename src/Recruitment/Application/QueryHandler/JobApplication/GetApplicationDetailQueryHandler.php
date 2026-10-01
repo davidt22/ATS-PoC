@@ -15,13 +15,13 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final class GetApplicationDetailQueryHandler
 {
     public function __construct(
-        private readonly JobApplicationRepositoryInterface $applications,
+        private readonly JobApplicationRepositoryInterface $applicationRepository,
     ) {
     }
 
     public function __invoke(GetApplicationDetailQuery $query): ApplicationDetailDTO
     {
-        $application = $this->applications->findById(new Uuid($query->applicationId));
+        $application = $this->applicationRepository->findById(new Uuid($query->applicationId));
 
         if (null === $application) {
             throw ApplicationNotFoundException::withId($query->applicationId);

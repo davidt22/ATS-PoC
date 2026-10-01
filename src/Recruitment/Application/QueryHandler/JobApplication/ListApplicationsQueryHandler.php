@@ -16,8 +16,8 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final class ListApplicationsQueryHandler
 {
     public function __construct(
-        private readonly JobApplicationRepositoryInterface $applications,
-        private readonly JobPostingRepositoryInterface $jobPostings,
+        private readonly JobApplicationRepositoryInterface $applicationRepository,
+        private readonly JobPostingRepositoryInterface $jobPostingRepository,
     ) {
     }
 
@@ -37,7 +37,7 @@ final class ListApplicationsQueryHandler
         );
 
         $jobTitles = [];
-        foreach ($this->jobPostings->findAll() as $jobPosting) {
+        foreach ($this->jobPostingRepository->findAll() as $jobPosting) {
             $jobTitles[$jobPosting->id()->value()] = $jobPosting->title()->value();
         }
 
@@ -46,7 +46,7 @@ final class ListApplicationsQueryHandler
                 $application,
                 $jobTitles[$application->jobId()->value()] ?? '',
             ),
-            $this->applications->search($criteria),
+            $this->applicationRepository->search($criteria),
         );
     }
 }

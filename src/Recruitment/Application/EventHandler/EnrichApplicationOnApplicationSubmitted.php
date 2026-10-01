@@ -22,7 +22,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final class EnrichApplicationOnApplicationSubmitted
 {
     public function __construct(
-        private readonly JobPostingRepositoryInterface $jobPostings,
+        private readonly JobPostingRepositoryInterface $jobPostingRepository,
         private readonly AiEnrichmentPort $aiEnrichment,
         private readonly CommandBus $commandBus,
     ) {
@@ -30,7 +30,7 @@ final class EnrichApplicationOnApplicationSubmitted
 
     public function __invoke(ApplicationSubmitted $event): void
     {
-        $jobPosting = $this->jobPostings->findById(new Uuid($event->jobId()));
+        $jobPosting = $this->jobPostingRepository->findById(new Uuid($event->jobId()));
 
         if (null === $jobPosting) {
             throw JobPostingNotFoundException::withId($event->jobId());

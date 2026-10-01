@@ -16,13 +16,13 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final class UpdateJobPostingCommandHandler
 {
     public function __construct(
-        private readonly JobPostingRepositoryInterface $jobPostings,
+        private readonly JobPostingRepositoryInterface $jobPostingRepository,
     ) {
     }
 
     public function __invoke(UpdateJobPostingCommand $command): void
     {
-        $jobPosting = $this->jobPostings->findById(new Uuid($command->jobPostingId));
+        $jobPosting = $this->jobPostingRepository->findById(new Uuid($command->jobPostingId));
 
         if (null === $jobPosting) {
             throw JobPostingNotFoundException::withId($command->jobPostingId);
@@ -30,6 +30,6 @@ final class UpdateJobPostingCommandHandler
 
         $jobPosting->update(new JobTitle($command->title), new JobDescription($command->description));
 
-        $this->jobPostings->save($jobPosting);
+        $this->jobPostingRepository->save($jobPosting);
     }
 }

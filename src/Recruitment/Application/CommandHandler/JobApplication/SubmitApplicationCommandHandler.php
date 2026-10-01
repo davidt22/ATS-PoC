@@ -23,8 +23,8 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final class SubmitApplicationCommandHandler
 {
     public function __construct(
-        private readonly JobApplicationRepositoryInterface $applications,
-        private readonly JobPostingRepositoryInterface $jobPostings,
+        private readonly JobApplicationRepositoryInterface $applicationRepository,
+        private readonly JobPostingRepositoryInterface $jobPostingRepository,
         private readonly EventBus $eventBus,
         private readonly Clock $clock,
     ) {
@@ -34,15 +34,11 @@ final class SubmitApplicationCommandHandler
     {
         $jobId = new Uuid($command->jobId);
 
-        if (null === $this->jobPostings->findById($jobId)) {
-            throw JobPostingNotFoundException::withId($command->jobId);
-        }
+        $this->checkJobPostingExists($jobId);
 
         $email = new Email($command->email);
 
-        if ($this->applications->existsByEmailAndJobId($email, $jobId)) {
-            throw DuplicateJobApplicationException::forEmailAndJobId($email->value(), $command->jobId);
-        }
+        $this->validateJobApplication($email, $jobId);
 
         $application = JobApplication::create(
             new Uuid($command->applicationId),
@@ -55,8 +51,22 @@ final class SubmitApplicationCommandHandler
             $this->clock->now(),
         );
 
-        $this->applications->save($application);
+        $this->applicationRepository->save($application);
 
         $this->eventBus->publish(...$application->pullDomainEvents());
+    }
+
+    public function checkJobPostingExists(Uuid $jobId): void
+    {
+        if (null === $this->jobPostingRepository->findById($jobId)) {
+            throw JobPostingNotFoundException::withId($jobId->value());
+        }
+    }
+
+    public function validateJobApplication(Email $email, Uuid $jobId): void
+    {
+        if ($this->applicationRepository->existsByEmailAndJobId($email, $jobId)) {
+            throw DuplicateJobApplicationException::forEmailAndJobId($email->value(), $jobId->value());
+        }
     }
 }
