@@ -35,7 +35,11 @@
                 <dd>{{ application.aiSummary }}</dd>
             </dl>
         {% else %}
-            <p class="empty-state">El enriquecimiento con IA todavía se está procesando. Recarga la página en unos segundos.</p>
+            <div {{ stimulus_controller('countdown-refresh', { seconds: 5 }) }}>
+                <p class="empty-state">
+                    Recargando en <strong {{ stimulus_target('countdown-refresh', 'counter') }}>5</strong>s — el enriquecimiento con IA todavía se está procesando.
+                </p>
+            </div>
         {% endif %}
 
         <h2 style="margin-top:1.5rem;">CV</h2>
