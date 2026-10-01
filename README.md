@@ -47,7 +47,7 @@ Adminer (inspección de la BD) queda disponible en **http://localhost:8081** (si
 
 ### Procesar el enriquecimiento con IA
 
-Al enviar una candidatura, el enriquecimiento se encola en RabbitMQ de forma asíncrona (no bloquea la respuesta). El worker (`messenger-worker`) se levanta automáticamente con `make init`/`make up` y consume la cola en background — no requiere ningún paso manual. Para ver su actividad:
+Al enviar una candidatura, el enriquecimiento se encola en RabbitMQ de forma asíncrona (no bloquea la respuesta). El worker (`messenger-worker`) se levanta automáticamente con `make init`/`make up` y consume la cola en background — no requiere ningún paso manual. Mientras el resultado no está listo, la página de detalle de la candidatura (`/applications/{id}`) muestra un contador de 5 segundos que recarga la página automáticamente. Para ver la actividad del worker:
 
 ```bash
 make worker
@@ -74,6 +74,7 @@ Resumen — el detalle y el porqué de cada una está en [`specs/recruitment/des
 - **Enriquecimiento IA mockeado**: `AiEnrichmentPort` es un puerto de dominio; `MockAiEnrichmentAdapter` lo implementa de forma determinista (resumen = excerpt del CV, puntuación = solapamiento de palabras clave entre el CV y el puesto), sin llamar a ningún proveedor externo, tal y como pide el enunciado.
 - **Bloqueo de borrado de ofertas con candidaturas**: eliminar una oferta que ya tiene candidaturas asociadas lanza una excepción de dominio (`JobPostingHasApplicationsException`) en vez de permitir referencias huérfanas.
 - **Reglas de dependencia**: `Domain` no depende de `Infrastructure`/`UI`; `Application` solo depende de `Domain` y de `Shared\Application\Bus`; `Infrastructure` implementa los puertos de `Domain`; `UI` solo llama a `Application`.
+- **Formularios web y Symfony UX Turbo**: Turbo está habilitado globalmente e intercepta todos los `<form>`, pero exige que la respuesta a un envío sea una redirección. Los controladores de formulario (`/apply`, `/jobs/new`, `/jobs/{id}/edit`) re-renderizan la plantilla con `200 OK` cuando hay errores de validación o de dominio (para mostrar los datos ya introducidos), así que esas plantillas llevan `data-turbo="false"` — si se añade un formulario nuevo con el mismo patrón de re-render en error, necesita el mismo atributo o Turbo lo deja sin actualizar visualmente.
 
 ## Endpoints
 
