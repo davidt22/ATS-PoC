@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Recruitment\Application\CommandHandler\JobApplication;
 
+use App\Recruitment\Application\Command\JobApplication\SubmitApplicationCommand;
 use App\Recruitment\Domain\Exception\DuplicateJobApplicationException;
 use App\Recruitment\Domain\Exception\JobPostingNotFoundException;
 use App\Recruitment\Domain\Model\JobApplication;
@@ -16,7 +17,6 @@ use App\Recruitment\Domain\ValueObject\Phone;
 use App\Shared\Application\Bus\EventBus;
 use App\Shared\Domain\Clock;
 use App\Shared\Domain\ValueObject\Uuid;
-use App\Recruitment\Application\Command\JobApplication\SubmitApplicationCommand;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler(bus: 'command.bus')]

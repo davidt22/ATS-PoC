@@ -15,6 +15,7 @@ final class ApplicationDetailDTO
         public readonly ?string $phone,
         public readonly ?string $notes,
         public readonly string $jobId,
+        public readonly string $jobTitle,
         public readonly string $cvText,
         public readonly string $status,
         public readonly ?string $aiSummary,
@@ -24,7 +25,7 @@ final class ApplicationDetailDTO
     ) {
     }
 
-    public static function fromDomain(JobApplication $application): self
+    public static function fromDomain(JobApplication $application, string $jobTitle): self
     {
         return new self(
             $application->id()->value(),
@@ -33,6 +34,7 @@ final class ApplicationDetailDTO
             $application->phone()?->value(),
             $application->notes(),
             $application->jobId()->value(),
+            $jobTitle,
             $application->cvText()->value(),
             $application->status()->value,
             $application->aiSummary(),

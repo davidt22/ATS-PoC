@@ -33,13 +33,13 @@ final class CreateJobPostingPageController extends AbstractController
             ]);
         }
 
-        if (!$this->isCsrfTokenValid('submit', $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('submit', $request->request->getString('_token'))) {
             throw new AccessDeniedHttpException('Invalid CSRF token.');
         }
 
         $dto = new JobPostingRequest();
-        $dto->title = $request->request->get('title');
-        $dto->description = $request->request->get('description');
+        $dto->title = $request->request->getString('title');
+        $dto->description = $request->request->getString('description');
 
         $violations = $this->validator->validate($dto);
 

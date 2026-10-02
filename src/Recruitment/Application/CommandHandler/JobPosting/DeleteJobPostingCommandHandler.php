@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Recruitment\Application\CommandHandler\JobPosting;
 
+use App\Recruitment\Application\Command\JobPosting\DeleteJobPostingCommand;
 use App\Recruitment\Domain\Exception\JobPostingHasApplicationsException;
 use App\Recruitment\Domain\Exception\JobPostingNotFoundException;
 use App\Recruitment\Domain\Repository\JobApplicationRepositoryInterface;
 use App\Recruitment\Domain\Repository\JobPostingRepositoryInterface;
 use App\Shared\Domain\ValueObject\Uuid;
-use App\Recruitment\Application\Command\JobPosting\DeleteJobPostingCommand;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler(bus: 'command.bus')]

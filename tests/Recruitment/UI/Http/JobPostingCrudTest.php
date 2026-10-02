@@ -51,6 +51,7 @@ final class JobPostingCrudTest extends WebTestCase
 
         self::getContainer()->get(EntityManagerInterface::class)->clear();
         $updated = $jobPostings->findById($jobPosting->id());
+        self::assertNotNull($updated);
         self::assertSame('Senior Backend Engineer', $updated->title()->value());
     }
 

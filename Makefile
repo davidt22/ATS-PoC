@@ -2,7 +2,7 @@
 
 .PHONY: help init up down stop restart build ps logs logs-php logs-nginx logs-db logs-rabbitmq logs-worker \
         shell db-shell composer console cache-clear migrate migration-diff migration-status \
-        test test-filter worker clean
+        test test-filter worker clean phpstan cs-check cs-fix qa
 
 ## ---- Arranque y ciclo de vida ----
 
@@ -92,6 +92,19 @@ test: ## Ejecutar toda la suite de tests
 
 test-filter: ## Ejecutar tests filtrados por nombre, ej: make test-filter ARGS=EnrichApplication
 	docker compose exec php vendor/bin/phpunit --filter $(ARGS)
+
+## ---- Calidad de código ----
+
+phpstan: ## Analisis estatico (PHPStan, nivel 8)
+	docker compose exec php vendor/bin/phpstan analyse
+
+cs-check: ## Comprobar estilo PSR-12 sin modificar ficheros (PHP-CS-Fixer --dry-run)
+	docker compose exec php vendor/bin/php-cs-fixer fix --dry-run --diff
+
+cs-fix: ## Corregir automaticamente el estilo PSR-12 (PHP-CS-Fixer)
+	docker compose exec php vendor/bin/php-cs-fixer fix
+
+qa: phpstan cs-check test ## Ejecutar analisis estatico + estilo + tests (pipeline de calidad completo)
 
 ## ---- Messenger ----
 

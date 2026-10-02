@@ -9,6 +9,9 @@
 
         <h2 style="margin-top:1.5rem;">Datos del candidato</h2>
         <dl class="detail-grid">
+            <dt>Puesto</dt>
+            <dd><a href="{{ path('job_detail_page', { id: application.jobId }) }}">{{ application.jobTitle }}</a></dd>
+
             <dt>Email</dt>
             <dd>{{ application.email }}</dd>
 

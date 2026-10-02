@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Recruitment\Application\CommandHandler;
 
+use App\Recruitment\Application\Command\JobApplication\SubmitApplicationCommand;
+use App\Recruitment\Application\CommandHandler\JobApplication\SubmitApplicationCommandHandler;
 use App\Recruitment\Domain\Event\ApplicationSubmitted;
 use App\Recruitment\Domain\Exception\DuplicateJobApplicationException;
 use App\Recruitment\Domain\Exception\JobPostingNotFoundException;
@@ -13,8 +15,6 @@ use App\Recruitment\Domain\ValueObject\ApplicationStatus;
 use App\Recruitment\Domain\ValueObject\JobDescription;
 use App\Recruitment\Domain\ValueObject\JobTitle;
 use App\Shared\Domain\ValueObject\Uuid;
-use App\Recruitment\Application\Command\JobApplication\SubmitApplicationCommand;
-use App\Recruitment\Application\CommandHandler\JobApplication\SubmitApplicationCommandHandler;
 use App\Tests\Recruitment\Application\Fake\FixedClock;
 use App\Tests\Recruitment\Application\Fake\InMemoryJobApplicationRepository;
 use App\Tests\Recruitment\Application\Fake\InMemoryJobPostingRepository;
@@ -78,6 +78,7 @@ final class SubmitApplicationCommandHandlerTest extends TestCase
 
         $application = $repository->findById(new Uuid($applicationId));
 
+        self::assertNotNull($application);
         self::assertNull($application->phone());
         self::assertNull($application->notes());
     }

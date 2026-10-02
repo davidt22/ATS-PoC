@@ -6,7 +6,6 @@ namespace App\Shared\Infrastructure\Symfony\Bus;
 
 use App\Shared\Application\Bus\Query;
 use App\Shared\Application\Bus\QueryBus;
-use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\HandlerFailedException;
 use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;

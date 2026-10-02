@@ -41,11 +41,14 @@ final class ApplyFlowTest extends WebTestCase
         $client->submit($form);
 
         self::assertResponseRedirects();
-        self::assertStringStartsWith('/applications/', $client->getResponse()->headers->get('Location'));
+        $location = $client->getResponse()->headers->get('Location');
+        self::assertNotNull($location);
+        self::assertStringStartsWith('/applications/', $location);
 
         $client->followRedirect();
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Ana García');
+        self::assertSelectorTextContains('.detail-grid', 'Backend Engineer');
     }
 
     public function test_submitting_an_invalid_application_shows_errors_without_persisting(): void

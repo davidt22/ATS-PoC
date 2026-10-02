@@ -76,6 +76,7 @@ final class EnrichmentAsyncFlowTest extends KernelTestCase
         $this->entityManager->clear();
         $enriched = $applications->findById($applicationId);
 
+        self::assertNotNull($enriched);
         self::assertSame(ApplicationStatus::Enriched, $enriched->status());
         self::assertNotNull($enriched->aiSummary());
         self::assertNotNull($enriched->aiScore());

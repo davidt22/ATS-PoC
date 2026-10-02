@@ -54,11 +54,15 @@ final class ApplicationsListTest extends WebTestCase
 
         $client->request('GET', '/api/applications');
         self::assertResponseIsSuccessful();
-        $all = json_decode($client->getResponse()->getContent(), true);
+        $allContent = $client->getResponse()->getContent();
+        self::assertIsString($allContent);
+        $all = json_decode($allContent, true);
         self::assertCount(2, $all);
 
         $client->request('GET', '/api/applications?search=ana');
-        $filtered = json_decode($client->getResponse()->getContent(), true);
+        $filteredContent = $client->getResponse()->getContent();
+        self::assertIsString($filteredContent);
+        $filtered = json_decode($filteredContent, true);
         self::assertCount(1, $filtered);
         self::assertSame('ana@example.com', $filtered[0]['email']);
         self::assertSame('Backend Engineer', $filtered[0]['jobTitle']);

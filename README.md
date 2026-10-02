@@ -39,6 +39,10 @@ make migration-diff   # generar una migración a partir de los cambios de mappin
 make migration-status # ver el estado de las migraciones
 make test             # ejecutar la suite de tests
 make test-filter ARGS=EnrichApplication  # ejecutar tests filtrados por nombre
+make phpstan           # análisis estático (PHPStan, nivel 8)
+make cs-check          # comprobar estilo PSR-12 sin modificar ficheros
+make cs-fix            # corregir automáticamente el estilo PSR-12
+make qa                # phpstan + cs-check + test (pipeline de calidad completo)
 make worker            # ver logs del worker de Messenger (enriquecimiento IA)
 make clean             # parar y eliminar contenedores, redes y el volumen de datos de MySQL
 ```
@@ -61,7 +65,16 @@ La UI de gestión de RabbitMQ está disponible en **http://localhost:15672** (us
 make test
 ```
 
-59 tests entre unitarios (dominio, casos de uso con fakes en memoria), de integración (repositorios Doctrine contra una base de datos MySQL de test real) y funcionales (`WebTestCase`, peticiones HTTP reales contra las rutas de la aplicación).
+67 tests entre unitarios (dominio, casos de uso con fakes en memoria), de integración (repositorios Doctrine contra una base de datos MySQL de test real) y funcionales (`WebTestCase`, peticiones HTTP reales contra las rutas de la aplicación).
+
+## Calidad de código
+
+```bash
+make phpstan   # PHPStan nivel 8 (src/ y tests/), con extensiones de Symfony/Doctrine/PHPUnit
+make cs-check  # PHP-CS-Fixer en modo --dry-run (PSR-12 + reglas adicionales, ver .php-cs-fixer.dist.php)
+make cs-fix    # aplica las correcciones de estilo automáticamente
+make qa        # ejecuta phpstan + cs-check + test, el pipeline completo
+```
 
 ## Decisiones de arquitectura
 

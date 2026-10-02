@@ -38,17 +38,17 @@ final class ApplyPageController extends AbstractController
             ]);
         }
 
-        if (!$this->isCsrfTokenValid('submit', $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('submit', $request->request->getString('_token'))) {
             throw new AccessDeniedHttpException('Invalid CSRF token.');
         }
 
         $dto = new SubmitApplicationRequest();
-        $dto->jobId = $request->request->get('jobId');
-        $dto->fullName = $request->request->get('fullName');
-        $dto->email = $request->request->get('email');
-        $dto->phone = $request->request->get('phone');
-        $dto->notes = $request->request->get('notes');
-        $dto->cvText = $request->request->get('cvText');
+        $dto->jobId = $request->request->getString('jobId');
+        $dto->fullName = $request->request->getString('fullName');
+        $dto->email = $request->request->getString('email');
+        $dto->phone = $request->request->getString('phone');
+        $dto->notes = $request->request->getString('notes');
+        $dto->cvText = $request->request->getString('cvText');
 
         $violations = $this->validator->validate($dto);
 

@@ -24,7 +24,7 @@ final class DeleteJobPostingPageController extends AbstractController
     #[Route('/jobs/{id}/delete', name: 'jobs_delete_page', methods: ['POST'], requirements: ['id' => '[0-9a-fA-F-]{36}'])]
     public function __invoke(Request $request, string $id): RedirectResponse
     {
-        if (!$this->isCsrfTokenValid('submit', $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('submit', $request->request->getString('_token'))) {
             throw new AccessDeniedHttpException('Invalid CSRF token.');
         }
 

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Recruitment\Application\CommandHandler;
 
-use App\Recruitment\Domain\Exception\InvalidJobTitleException;
-use App\Shared\Domain\ValueObject\Uuid;
 use App\Recruitment\Application\Command\JobPosting\CreateJobPostingCommand;
 use App\Recruitment\Application\CommandHandler\JobPosting\CreateJobPostingCommandHandler;
+use App\Recruitment\Domain\Exception\InvalidJobTitleException;
+use App\Shared\Domain\ValueObject\Uuid;
 use App\Tests\Recruitment\Application\Fake\InMemoryJobPostingRepository;
 use PHPUnit\Framework\TestCase;
 

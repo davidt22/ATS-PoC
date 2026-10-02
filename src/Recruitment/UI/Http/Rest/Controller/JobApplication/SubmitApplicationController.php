@@ -42,6 +42,9 @@ final class SubmitApplicationController extends AbstractController
 
         $applicationId = Uuid::generate()->value();
 
+        // Guaranteed non-null: $violations is empty, and all four fields carry a NotBlank constraint.
+        assert(null !== $dto->jobId && null !== $dto->fullName && null !== $dto->email && null !== $dto->cvText);
+
         try {
             $this->commandBus->dispatch(new SubmitApplicationCommand(
                 $applicationId,

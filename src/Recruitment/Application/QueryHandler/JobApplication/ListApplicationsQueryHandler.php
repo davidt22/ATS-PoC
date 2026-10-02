@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Recruitment\Application\QueryHandler\JobApplication;
 
 use App\Recruitment\Application\DTO\ApplicationListItemDTO;
+use App\Recruitment\Application\Query\JobApplication\ListApplicationsQuery;
 use App\Recruitment\Domain\Repository\ApplicationSearchCriteria;
 use App\Recruitment\Domain\Repository\JobApplicationRepositoryInterface;
 use App\Recruitment\Domain\Repository\JobPostingRepositoryInterface;
 use App\Recruitment\Domain\ValueObject\ApplicationStatus;
-use App\Recruitment\Application\Query\JobApplication\ListApplicationsQuery;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler(bus: 'query.bus')]

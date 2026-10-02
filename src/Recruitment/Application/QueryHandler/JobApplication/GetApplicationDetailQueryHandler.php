@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Recruitment\Application\QueryHandler\JobApplication;
 
 use App\Recruitment\Application\DTO\ApplicationDetailDTO;
+use App\Recruitment\Application\Query\JobApplication\GetApplicationDetailQuery;
 use App\Recruitment\Domain\Exception\ApplicationNotFoundException;
 use App\Recruitment\Domain\Repository\JobApplicationRepositoryInterface;
+use App\Recruitment\Domain\Repository\JobPostingRepositoryInterface;
 use App\Shared\Domain\ValueObject\Uuid;
-use App\Recruitment\Application\Query\JobApplication\GetApplicationDetailQuery;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler(bus: 'query.bus')]
@@ -16,6 +17,7 @@ final class GetApplicationDetailQueryHandler
 {
     public function __construct(
         private readonly JobApplicationRepositoryInterface $applicationRepository,
+        private readonly JobPostingRepositoryInterface $jobPostingRepository,
     ) {
     }
 
@@ -27,6 +29,8 @@ final class GetApplicationDetailQueryHandler
             throw ApplicationNotFoundException::withId($query->applicationId);
         }
 
-        return ApplicationDetailDTO::fromDomain($application);
+        $jobPosting = $this->jobPostingRepository->findById($application->jobId());
+
+        return ApplicationDetailDTO::fromDomain($application, $jobPosting?->title()->value() ?? '');
     }
 }

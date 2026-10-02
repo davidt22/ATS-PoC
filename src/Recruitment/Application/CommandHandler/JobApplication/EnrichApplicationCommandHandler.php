@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Recruitment\Application\CommandHandler\JobApplication;
 
+use App\Recruitment\Application\Command\JobApplication\EnrichApplicationCommand;
 use App\Recruitment\Domain\Exception\ApplicationNotFoundException;
 use App\Recruitment\Domain\Repository\JobApplicationRepositoryInterface;
 use App\Recruitment\Domain\ValueObject\AiScore;
 use App\Shared\Application\Bus\EventBus;
 use App\Shared\Domain\Clock;
 use App\Shared\Domain\ValueObject\Uuid;
-use App\Recruitment\Application\Command\JobApplication\EnrichApplicationCommand;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler(bus: 'command.bus')]
